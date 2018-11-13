@@ -1,0 +1,30 @@
+{
+  "name": "cssmodules-to-emotion",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "lint-fix": "tslint --project tsconfig.json --fix; yarn prettier --write",
+    "lint": "tsc --project tsconfig.json --noEmit && tslint --project tsconfig.json && yarn prettier --list-different",
+    "prettier": "prettier '*.{js,json}' 'packages/*.{js,json}' 'packages/*/*.{js,ts,tsx,json,scss}' 'packages/*/src/**/*.{js,ts,tsx,json,scss}'",
+    "start": "ts-node --project tsconfig.json -T index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "camelcase": "^5.0.0",
+    "node-sass": "^4.10.0",
+    "sast": "^0.7.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.1.6"
+  },
+  "devDependencies": {
+    "@types/camelcase": "^4.1.0",
+    "@types/jest": "^23.3.9",
+    "@types/node": "^10.12.7",
+    "jest": "^23.6.0",
+    "prettier": "^1.15.2",
+    "ts-jest": "^23.10.4",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.16.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "include": ["index.ts", "src/**/*.ts"],
+  "files": ["./lib.d.ts"],
+  "compilerOptions": {
+    "allowJs": false,
+    "jsx": "react",
+    "lib": ["es6"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "build/",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "target": "es2017"
+  }
+}
