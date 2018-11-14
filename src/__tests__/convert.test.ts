@@ -222,3 +222,31 @@ it('convert scss variables to javascript variables', () => {
     // \${thirdVar}: green
   `))
 })
+
+it('ignore unsupported atrules', () => {
+  const scss = normalize(`
+    @import 'foo'
+    @keyframes highlighted-bubble-animation {
+      name: test;
+    }
+    @media only screen and (max-width: 768px) {
+      color: red;
+    }
+  `)
+  const emotion = convert(scss, 'nested-wildcard-selector.scss')
+  expect(emotion).toBe(normalize(`
+    import { css, injectGlobal } from 'emotion'
+
+    // TODO
+    // @import 'foo'
+
+    // TODO
+    // @keyframes highlighted-bubble-animation {
+    //   name: test;
+    // }
+
+    @media only screen and (max-width: 768px) {
+      color: red;
+    }
+  `))
+})

@@ -24,7 +24,7 @@ export function convert(scss: string, filename: string): string {
         return { output, hoist: hoist.map(n => ({ ...n, parents: [] })) }
       })
     } else {
-      return unsupported(filename, node, 'convert')
+      return unsupported(filename, node)
     }
   }
 
@@ -111,7 +111,7 @@ export function convert(scss: string, filename: string): string {
           hoist,
         }
       } else {
-        return unsupported(filename, node, 'convertRuleset.ruleset')
+        return unsupported(filename, node)
       }
     } else if (node.type === 'declaration') {
       return convertDeclaration(node, parents)
@@ -124,7 +124,7 @@ export function convert(scss: string, filename: string): string {
     } else if (node.type === 'space') {
       return ignore()
     } else {
-      return unsupported(filename, node, 'convertRuleset')
+      return unsupported(filename, node)
     }
   }
 
@@ -142,15 +142,16 @@ export function convert(scss: string, filename: string): string {
         }]
       }
     } else {
-      return unsupported(filename, node, 'convertDeclaration')
+      return unsupported(filename, node)
     }
   }
 
   function convertAtRule(node: SastNode, _parents: SastNode[]): ConvertResult {
-    return simple([`${sast.stringify({
-        ...node,
-        children: node.children.filter(n => n.type !== 'block' && n.type !== 'declarationDelimiter')
-      })};`])
+    if (node.children[0].children[0].type === 'ident' && node.children[0].children[0].value === 'media') {
+      return simple([sast.stringify(node)])
+    } else {
+      return unsupported(filename, node)
+    }
   }
 
   function convertComment(node: SastNode, _parents: SastNode[]): ConvertResult {
@@ -198,11 +199,11 @@ export function convert(scss: string, filename: string): string {
   }
 }
 
-function unsupported(filename: string, node: SastNode, label?: string): ConvertResult {
+function unsupported(filename: string, node: SastNode): ConvertResult {
   const position = node.position ? `${node.position.start.line}:${node.position.start.column}` : '?'
   const location = `${filename}:${position}`
   // tslint:disable-next-line no-console
-  console.warn(`Unsupported node '${node.type}' at ${location} (${label || ''})\n\n${normalize(sast.stringify(node))}`)
+  console.warn(`Unsupported node '${node.type}' at ${location}\n\n${normalize(sast.stringify(node))}`)
   return simple(['// TODO\n' + commentLines(sast.stringify(node))])
 }
 
