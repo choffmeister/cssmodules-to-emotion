@@ -18,7 +18,7 @@ it('flatten nested global', () => {
       }
     }
   `)
-  const emotion = convert(scss, 'flatten-nested-global.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -55,7 +55,7 @@ it('flatten nested local', () => {
       }
     }
   `)
-  const emotion = convert(scss, 'flatten-nested-global.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -92,7 +92,7 @@ it('not flatten nested pseudo 1', () => {
       }
     }
   `)
-  const emotion = convert(scss, 'not-flatten-nested-pseudo-1.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -118,7 +118,7 @@ it.skip('not flatten nested pseudo 2', () => {
       color: red;
     }
   `)
-  const emotion = convert(scss, 'not-flatten-nested-pseudo-2.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -139,7 +139,7 @@ it('nested element selector', () => {
       }
     }
   `)
-  const emotion = convert(scss, 'nested-element-selector.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -161,7 +161,7 @@ it('nested wildcard selector', () => {
       }
     }
   `)
-  const emotion = convert(scss, 'nested-wildcard-selector.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -193,7 +193,7 @@ it('convert scss variables to javascript variables', () => {
       }
     }
   `)
-  const emotion = convert(scss, 'convert-scss-variables-to-javascript-variables.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -233,7 +233,7 @@ it('ignore unsupported atrules', () => {
       color: red;
     }
   `)
-  const emotion = convert(scss, 'nested-wildcard-selector.scss')
+  const emotion = convert(scss, 'test.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 

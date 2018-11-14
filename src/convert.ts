@@ -1,4 +1,5 @@
 import * as camelcase from 'camelcase'
+import 'colors'
 import * as sast from 'sast'
 import { commentLines, indentLines, normalize } from './helpers'
 import { ConvertFunction, ConvertResult, SastNode } from './types'
@@ -203,7 +204,7 @@ function unsupported(filename: string, node: SastNode): ConvertResult {
   const position = node.position ? `${node.position.start.line}:${node.position.start.column}` : '?'
   const location = `${filename}:${position}`
   // tslint:disable-next-line no-console
-  console.warn(`Unsupported node '${node.type}' at ${location}\n\n${normalize(sast.stringify(node))}`)
+  console.log('Unsupported node '.yellow + node.type + ' at '.yellow + location.blue + '\n' + indentLines(normalize(sast.stringify(node))).gray)
   return simple(['// TODO\n' + commentLines(sast.stringify(node))])
 }
 

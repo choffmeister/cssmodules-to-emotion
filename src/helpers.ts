@@ -4,11 +4,15 @@
 export function normalize(str: string): string {
   const measure = (str: string) => str.match(/^(\s*)/)![0].length
   const ignoreEmptyLines = (str: string) => str.trim() !== ''
-
+  const repeat = <T>(item: T, count: number): T[] => {
+    const result: T[] = []
+    for (let i = 0; i < count; i++) { result.push(item) }
+    return result
+  }
   const lines = str.split('\n')
   const margin = lines.filter(ignoreEmptyLines).map(measure).reduce((acc, m) => Math.min(acc, m), Infinity)
   return Number.isFinite(margin)
-    ? lines.map(l => l.substr(margin)).join('\n').trim()
+    ? repeat(' ', measure(lines[0]) - margin).join('') + lines.map(l => l.substr(margin)).join('\n').trim()
     : str.trim()
 }
 

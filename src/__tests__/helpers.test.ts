@@ -6,7 +6,7 @@ it('normalizes', () => {
   expect(normalize('hello\nworld')).toBe('hello\nworld')
   expect(normalize('  hello\n  world')).toBe('hello\nworld')
   expect(normalize('  hello\n    world')).toBe('hello\n  world')
-  expect(normalize('    hello\n  world')).toBe('hello\nworld')
+  expect(normalize('    hello\n  world')).toBe('  hello\nworld')
   expect(normalize('    hello\n    world')).toBe('hello\nworld')
 })
 
