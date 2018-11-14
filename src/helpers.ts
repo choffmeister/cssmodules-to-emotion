@@ -12,6 +12,10 @@ export function normalize(str: string): string {
     : str.trim()
 }
 
+export function commentLines(str: string): string {
+  return normalize(str).split('\n').map(l => '// ' + l).join('\n')
+}
+
 export function indentLines(str: string): string {
   return str.split('\n').map(l => '  ' + l).join('\n')
 }

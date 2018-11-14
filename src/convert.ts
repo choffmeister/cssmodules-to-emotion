@@ -1,6 +1,6 @@
 import * as camelcase from 'camelcase'
 import * as sast from 'sast'
-import { indentLines, normalize } from './helpers'
+import { commentLines, indentLines, normalize } from './helpers'
 import { ConvertFunction, ConvertResult, SastNode } from './types'
 
 export function convert(scss: string, filename: string): string {
@@ -33,13 +33,13 @@ export function convert(scss: string, filename: string): string {
       const selector = sast.stringify(node.children[0])
       const block = node.children.find(sub => sub.type === 'block')!
 
-      if (node.children[0].children[0].type === 'class' && parents.length === 0) {
+      if (node.children[0].children[0].type === 'class' && node.children[0].children.length === 1 && parents.length === 0) {
         const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
         return {
           output: output.length > 0 ? [`export const ${camelcase(selector)} = css\`\n${indentLines(output.join('\n'))}\n\``] : [],
           hoist,
         }
-      } else if (node.children[0].children[0].type === 'class' && parents.length > 0) {
+      } else if (node.children[0].children[0].type === 'class' && node.children[0].children.length === 1 && parents.length > 0) {
         const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
         return {
           output: output.length > 0 ? [`${selector} {\n${indentLines(output.join('\n'))}\n}`] : [],
@@ -132,7 +132,7 @@ export function convert(scss: string, filename: string): string {
     if (node.children[0].type === 'property' && node.children[0].children[0].type === 'ident') {
       return simple([`${sast.stringify(node)};`])
     } else if (node.children[0].children[0].type === 'variable' && parents.length === 0) {
-      return simple([`// TODO ${sast.stringify(node)};`])
+      return simple(['// TODO\n' + commentLines(sast.stringify(node))])
     } else if (node.children[0].children[0].type === 'variable' && parents.length > 0) {
       return {
         output: [],
@@ -203,7 +203,7 @@ function unsupported(filename: string, node: SastNode, label?: string): ConvertR
   const location = `${filename}:${position}`
   // tslint:disable-next-line no-console
   console.warn(`Unsupported node '${node.type}' at ${location} (${label || ''})\n\n${normalize(sast.stringify(node))}`)
-  return ignore()
+  return simple(['// TODO\n' + commentLines(sast.stringify(node))])
 }
 
 function ignore(): ConvertResult {

@@ -77,7 +77,7 @@ it('flatten nested local', () => {
   `))
 })
 
-it('not flatten nested pseudo', () => {
+it('not flatten nested pseudo 1', () => {
   const scss = normalize(`
     .foo {
       color: blue;
@@ -92,7 +92,7 @@ it('not flatten nested pseudo', () => {
       }
     }
   `)
-  const emotion = convert(scss, 'not-flatten-nested-pseudo.scss')
+  const emotion = convert(scss, 'not-flatten-nested-pseudo-1.scss')
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
@@ -106,6 +106,25 @@ it('not flatten nested pseudo', () => {
       }
       &:hover form {
         color: yellow;
+      }
+    \`
+  `))
+})
+
+
+it.skip('not flatten nested pseudo 2', () => {
+  const scss = normalize(`
+    .foo:hover {
+      color: red;
+    }
+  `)
+  const emotion = convert(scss, 'not-flatten-nested-pseudo-2.scss')
+  expect(emotion).toBe(normalize(`
+    import { css, injectGlobal } from 'emotion'
+
+    export const foo = css\`
+      &:hover {
+        color: red;
       }
     \`
   `))
@@ -178,7 +197,8 @@ it('convert scss variables to javascript variables', () => {
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
-    // TODO \${firstVar}: red;
+    // TODO
+    // \${firstVar}: red
 
     export const foo = css\`
       color: \${firstVar};
@@ -191,13 +211,14 @@ it('convert scss variables to javascript variables', () => {
       }
     \`
 
-    // TODO \${secondVar}: blue;
+    // TODO
+    // \${secondVar}: blue
 
     export const fooBar = css\`
       color: \${secondVar};
     \`
 
-    // TODO \${thirdVar}: green;
+    // TODO
+    // \${thirdVar}: green
   `))
 })
-
