@@ -4,8 +4,8 @@ import * as sast from 'sast'
 import { commentLines, indentLines, normalize } from './helpers'
 import { ConvertFunction, ConvertResult, SastNode } from './types'
 
-export function convert(scss: string, filename: string): string {
-  return convertRoot(rewriteVariables(sast.parse(scss, {syntax: 'scss'}))).output.join('\n\n')
+export function convert(input: string, filename: string, syntax: 'css' | 'less' | 'scss'): string {
+  return convertRoot(rewriteVariables(sast.parse(input, { syntax }))).output.join('\n\n')
 
   function convertRoot(node: SastNode): ConvertResult {
     if (node.type === 'stylesheet') {

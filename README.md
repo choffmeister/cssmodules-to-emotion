@@ -2,5 +2,5 @@
 
 ```bash
 yarn install --pure-lockfile
-yarn start /path/to/your/project
+yarn start -d /path/to/your/project
 ```
