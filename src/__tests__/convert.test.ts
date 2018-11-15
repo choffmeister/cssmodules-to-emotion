@@ -19,7 +19,7 @@ it('flatten nested global', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { injectGlobal } from 'emotion'
 
     // tslint:disable-next-line no-unused-expression
@@ -56,7 +56,7 @@ it('flatten nested local', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { css } from 'emotion'
 
     export const first = css\`
@@ -93,7 +93,7 @@ it('not flatten nested pseudo 1', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { css } from 'emotion'
 
     export const foo = css\`
@@ -119,7 +119,7 @@ it('not flatten nested pseudo 2', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     // TODO
     // .foo:hover {
     //   color: red;
@@ -137,7 +137,7 @@ it('nested element selector', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { css } from 'emotion'
 
     export const foo = css\`
@@ -159,7 +159,7 @@ it('nested wildcard selector', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { css } from 'emotion'
 
     export const foo = css\`
@@ -183,7 +183,7 @@ it('direct child selector', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { css } from 'emotion'
 
     export const foo = css\`
@@ -217,7 +217,7 @@ it('convert scss variables to javascript variables', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
     // TODO const firstVar = 'red'
@@ -254,7 +254,7 @@ it('ignore unsupported atrules', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     // TODO
     // @import 'foo'
 
@@ -276,7 +276,7 @@ it('convert comments', () => {
        bar */
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     /* test */
 
     /* foo bar */
@@ -286,7 +286,7 @@ it('convert comments', () => {
 it('only imports what is needed', () => {
   const scss1 = normalize(``)
   const emotion1 = convert(scss1, 'test.scss', 'scss')
-  expect(emotion1).toBe(normalize(``))
+  expect(normalize(emotion1)).toBe(normalize(``))
 
   const scss2 = normalize(`
     .foo {
@@ -294,7 +294,7 @@ it('only imports what is needed', () => {
     }
   `)
   const emotion2 = convert(scss2, 'test.scss', 'scss')
-  expect(emotion2).toBe(normalize(`
+  expect(normalize(emotion2)).toBe(normalize(`
     import { css } from 'emotion'
 
     export const foo = css\`
@@ -310,7 +310,7 @@ it('only imports what is needed', () => {
     }
   `)
   const emotion3 = convert(scss3, 'test.scss', 'scss')
-  expect(emotion3).toBe(normalize(`
+  expect(normalize(emotion3)).toBe(normalize(`
     import { injectGlobal } from 'emotion'
 
     // tslint:disable-next-line no-unused-expression
@@ -339,7 +339,7 @@ it('ignore nested classes', () => {
     }
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
-  expect(emotion).toBe(normalize(`
+  expect(normalize(emotion)).toBe(normalize(`
     import { css } from 'emotion'
 
     export const first = css\`

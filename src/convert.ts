@@ -7,7 +7,7 @@ import { ConvertFunction, ConvertResult, SastNode } from './types'
 export type Syntax = 'css' | 'less' | 'scss'
 
 export function convert(input: string, filename: string, syntax: Syntax): string {
-  return convertRoot(rewriteVariables(sast.parse(input, { syntax }))).join('\n\n')
+  return convertRoot(rewriteVariables(sast.parse(input, { syntax }))).join('\n\n') + '\n'
 
   function convertRoot(node: SastNode): string[] {
     if (node.type === 'stylesheet') {
