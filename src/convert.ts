@@ -140,7 +140,9 @@ export function convert(input: string, filename: string, syntax: 'css' | 'less' 
     if (node.children[0].type === 'property' && node.children[0].children[0].type === 'ident') {
       return simple([`${sast.stringify(node)};`])
     } else if (node.children[0].children[0].type === 'variable' && parents.length === 0) {
-      return simple(['// TODO\n' + commentLines(sast.stringify(node))])
+      const name = sast.stringify(node.children[0]).match(/^\$\{(.*)\}$/)![1]
+      const value = sast.stringify(node.children.find(n => n.type === 'value')!)
+      return simple([`// TODO const ${name} = '${value}'`])
     } else if (node.children[0].children[0].type === 'variable' && parents.length > 0) {
       return {
         output: [],

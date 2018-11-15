@@ -197,8 +197,7 @@ it('convert scss variables to javascript variables', () => {
   expect(emotion).toBe(normalize(`
     import { css, injectGlobal } from 'emotion'
 
-    // TODO
-    // \${firstVar}: red
+    // TODO const firstVar = 'red'
 
     export const foo = css\`
       color: \${firstVar};
@@ -211,15 +210,13 @@ it('convert scss variables to javascript variables', () => {
       }
     \`
 
-    // TODO
-    // \${secondVar}: blue
+    // TODO const secondVar = 'blue'
 
     export const fooBar = css\`
       color: \${secondVar};
     \`
 
-    // TODO
-    // \${thirdVar}: green
+    // TODO const thirdVar = 'green'
   `))
 })
 
