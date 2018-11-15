@@ -5,9 +5,9 @@ import { commentLines, indentLines, normalize } from './helpers'
 import { ConvertFunction, ConvertResult, SastNode } from './types'
 
 export function convert(input: string, filename: string, syntax: 'css' | 'less' | 'scss'): string {
-  return convertRoot(rewriteVariables(sast.parse(input, { syntax }))).output.join('\n\n')
+  return convertRoot(rewriteVariables(sast.parse(input, { syntax }))).join('\n\n')
 
-  function convertRoot(node: SastNode): ConvertResult {
+  function convertRoot(node: SastNode): string[] {
     if (node.type === 'stylesheet') {
       const { hoist, output } = node.children.reduce<ConvertResult>((acc, node) => {
         const { output, hoist } = convertNode(node, [])
@@ -16,16 +16,23 @@ export function convert(input: string, filename: string, syntax: 'css' | 'less' 
           hoist: [...acc.hoist, ...hoist]
         }
       }, {
-        output: [`import { css, injectGlobal } from 'emotion'`],
+        output: [],
         hoist: []
       })
       // deferred have fallen through until the root, so we remove the parents
-      return resolveHoist({ output, hoist: hoist.map(n => ({ ...n, parents: [] })) }, (n, p) => {
+      const result = resolveHoist({ output, hoist: hoist.map(n => ({ ...n, parents: [] })) }, (n, p) => {
         const { output, hoist } = convertNode(n, p)
         return { output, hoist: hoist.map(n => ({ ...n, parents: [] })) }
-      })
+      }).output
+      // detect which imports are needed
+      const imports = [
+        !!result.find(r => !!r.match(/css`/)) ? 'css' : undefined,
+        !!result.find(r => !!r.match(/injectGlobal`/)) ? 'injectGlobal' : undefined,
+      ].filter(i => !!i).map(i => i!)
+      const importResult = imports.length > 0 ? [`import { ${imports.join(', ')} } from 'emotion'`] : []
+      return [...importResult, ...result]
     } else {
-      return unsupported(filename, node)
+      throw new Error()
     }
   }
 
