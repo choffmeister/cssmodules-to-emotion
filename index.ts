@@ -3,17 +3,22 @@ import * as path from 'path'
 import * as yargs from 'yargs'
 import { convert, Syntax } from './src/convert'
 
-function run(directory: string, syntax: Syntax): void {
+function run(directory: string, syntax: Syntax, write: boolean): void {
   const files = listFiles(directory)
   files.forEach(file => {
     if (file.match(/\.scss$/)) {
       const input = fs.readFileSync(file, 'utf8')
       const output = convert(input, file, syntax)
-      fs.writeFileSync(file.substr(0, file.length - 5) + '.css.ts', output, 'utf8')
+      if (write) {
+        fs.writeFileSync(file.substr(0, file.length - 5) + '.css.ts', output, 'utf8')
+        fs.unlinkSync(file)
+      }
     } else if (file.match(/\.tsx$/)) {
       const input = fs.readFileSync(file, 'utf8')
       const output = input.replace(/([^']+)\.scss/g, (_, f) => f + '.css')
-      fs.writeFileSync(file, output, 'utf8')
+      if (write) {
+        fs.writeFileSync(file, output, 'utf8')
+      }
     }
   })
 }
@@ -52,7 +57,8 @@ const cli = yargs
       default: throw new Error('The supported syntaxes are css, scss and less!')
     }
   })
+  .option('w', { alias: 'write', type: 'boolean' })
   .demandOption(['d', 's'])
   .strict()
 
-run(cli.argv.directory, cli.argv.syntax)
+run(cli.argv.directory, cli.argv.syntax, cli.argv.write)
