@@ -250,3 +250,19 @@ it('ignore unsupported atrules', () => {
     }
   `))
 })
+
+it('convert comments', () => {
+  const scss = normalize(`
+    // test
+    /* foo
+       bar */
+  `)
+  const emotion = convert(scss, 'test.scss', 'scss')
+  expect(emotion).toBe(normalize(`
+    import { css, injectGlobal } from 'emotion'
+
+    /* test */
+
+    /* foo bar */
+  `))
+})

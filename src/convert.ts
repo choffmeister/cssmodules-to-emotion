@@ -156,7 +156,7 @@ export function convert(input: string, filename: string, syntax: 'css' | 'less' 
   }
 
   function convertComment(node: SastNode, _parents: SastNode[]): ConvertResult {
-    return simple([`// ${node.value.replace('\n', '').replace(/\s{2,}/g, '').trim()}`])
+    return simple([`/* ${node.value.replace('\n', ' ').replace(/\s{2,}/g, ' ').trim()} */`])
   }
 
   function traverseChildren(node: SastNode, parents: SastNode[], fn: ConvertFunction): ConvertResult {
