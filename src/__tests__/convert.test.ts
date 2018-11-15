@@ -104,15 +104,16 @@ it('not flatten nested pseudo 1', () => {
           color: green;
         }
       }
-      &:hover form {
-        color: yellow;
-      }
+      // TODO
+      // &:hover form {
+      //   color: yellow;
+      // }
     \`
   `))
 })
 
 
-it.skip('not flatten nested pseudo 2', () => {
+it('not flatten nested pseudo 2', () => {
   const scss = normalize(`
     .foo:hover {
       color: red;
@@ -120,13 +121,10 @@ it.skip('not flatten nested pseudo 2', () => {
   `)
   const emotion = convert(scss, 'test.scss', 'scss')
   expect(emotion).toBe(normalize(`
-    import { css } from 'emotion'
-
-    export const foo = css\`
-      &:hover {
-        color: red;
-      }
-    \`
+    // TODO
+    // .foo:hover {
+    //   color: red;
+    // }
   `))
 })
 
@@ -295,6 +293,46 @@ it('only imports what is needed', () => {
       .foo {
         color: red;
       }
+    \`
+  `))
+})
+
+it('ignore nested classes', () => {
+  const scss = normalize(`
+    .first {
+      &-inner {
+        .forth {
+          color: green;
+        }
+      }
+      .second {
+        color: red;
+      }
+      &.third {
+        color: blue;
+      }
+    }
+  `)
+  const emotion = convert(scss, 'test.scss', 'scss')
+  expect(emotion).toBe(normalize(`
+    import { css } from 'emotion'
+
+    export const first = css\`
+      // TODO
+      // .second {
+      //   color: red;
+      // }
+      // TODO
+      // &.third {
+      //   color: blue;
+      // }
+    \`
+
+    export const firstInner = css\`
+      // TODO
+      // .forth {
+      //   color: green;
+      // }
     \`
   `))
 })

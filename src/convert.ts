@@ -1,7 +1,7 @@
 import * as camelcase from 'camelcase'
 import 'colors'
 import * as sast from 'sast'
-import { commentLines, indentLines, normalize } from './helpers'
+import { commentLines, indentLines, normalize, repeat } from './helpers'
 import { ConvertFunction, ConvertResult, SastNode } from './types'
 
 export function convert(input: string, filename: string, syntax: 'css' | 'less' | 'scss'): string {
@@ -16,9 +16,9 @@ export function convert(input: string, filename: string, syntax: 'css' | 'less' 
           hoist: [...acc.hoist, ...hoist]
         }
       }, {
-        output: [],
-        hoist: []
-      })
+          output: [],
+          hoist: []
+        })
       // deferred have fallen through until the root, so we remove the parents
       const result = resolveHoist({ output, hoist: hoist.map(n => ({ ...n, parents: [] })) }, (n, p) => {
         const { output, hoist } = convertNode(n, p)
@@ -38,16 +38,21 @@ export function convert(input: string, filename: string, syntax: 'css' | 'less' 
 
   function convertNode(node: SastNode, parents: SastNode[]): ConvertResult {
     if (node.type === 'ruleset' && node.children[0].type === 'selector') {
+
       const selector = sast.stringify(node.children[0])
       const block = node.children.find(sub => sub.type === 'block')!
 
-      if (node.children[0].children[0].type === 'class' && node.children[0].children.length === 1 && parents.length === 0) {
-        const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
-        return {
-          output: output.length > 0 ? [`export const ${camelcase(selector)} = css\`\n${indentLines(output.join('\n'))}\n\``] : [],
-          hoist,
+      if (node.children[0].children[0].type === 'class' && parents.length === 0) {
+        if (node.children[0].children.length === 1) {
+          const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
+          return {
+            output: output.length > 0 ? [`export const ${camelcase(selector)} = css\`\n${indentLines(output.join('\n'))}\n\``] : [],
+            hoist,
+          }
+        } else {
+          return unsupported(filename, node)
         }
-      } else if (node.children[0].children[0].type === 'class' && node.children[0].children.length === 1 && parents.length > 0) {
+      } else if (node.children[0].children[0].type !== 'parentSelector' && parents.length > 0 && parents[0].children[0].children[0].type === 'pseudoClass' && parents[0].children[0].children[0].children[0].value === 'global') {
         const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
         return {
           output: output.length > 0 ? [`${selector} {\n${indentLines(output.join('\n'))}\n}`] : [],
@@ -69,42 +74,46 @@ export function convert(input: string, filename: string, syntax: 'css' | 'less' 
           output: output.length > 0 ? [`// tslint:disable-next-line no-unused-expression\ninjectGlobal\`\n${indentLines(output.join('\n'))}\n\``] : [],
           hoist,
         }
-      } else if (node.children[0].children[0].type === 'parentSelector' && node.children[0].children[1].type === 'parentSelectorExtension' && node.children[0].children[1].children[0].type === 'ident') {
-        // resolve parent selector extension
-        const parentSelector = sast.stringify(parents[parents.length - 1].children[0].children[0].children[0])
-        const resolvedNode = {
-          node: {
-            ...node,
-            children: [
-              {
-                type: 'selector',
-                position: {},
-                children: [
-                  {
-                    type: 'class',
-                    children: [
-                      {
-                        type: 'ident',
-                        value: parentSelector + node.children[0].children[1].children[0].value,
-                      }
-                    ],
-                  }
-                ],
-              } as any,
-              ...node.children.slice(1),
-            ]
-          },
-          parents
-        }
-        return {
-          output: [],
-          hoist: [resolvedNode],
-        }
       } else if (node.children[0].children[0].type === 'parentSelector') {
-        const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
-        return {
-          output: output.length > 0 ? [`${selector} {\n${indentLines(output.join('\n'))}\n}`] : [],
-          hoist,
+        if (node.children[0].children[1].type === 'parentSelectorExtension' && node.children[0].children.length === 2) {
+          // resolve parent selector extension
+          const parentSelector = sast.stringify(parents[parents.length - 1].children[0].children[0].children[0])
+          const resolvedNode = {
+            node: {
+              ...node,
+              children: [
+                {
+                  type: 'selector',
+                  position: {},
+                  children: [
+                    {
+                      type: 'class',
+                      children: [
+                        {
+                          type: 'ident',
+                          value: parentSelector + node.children[0].children[1].children[0].value,
+                        }
+                      ],
+                    }
+                  ],
+                } as any,
+                ...node.children.slice(1),
+              ]
+            },
+            parents
+          }
+          return {
+            output: [],
+            hoist: [resolvedNode],
+          }
+        } else if (node.children[0].children.slice(1).every(n => n.type === 'pseudoClass')) {
+          const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
+          return {
+            output: output.length > 0 ? [`${selector} {\n${indentLines(output.join('\n'))}\n}`] : [],
+            hoist,
+          }
+        } else {
+          return unsupported(filename, node)
         }
       } else if (node.children[0].children[0].type === 'typeSelector') {
         const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
@@ -214,7 +223,8 @@ function unsupported(filename: string, node: SastNode): ConvertResult {
   const location = `${filename}:${position}`
   // tslint:disable-next-line no-console
   console.log('Unsupported node '.yellow + node.type + ' at '.yellow + location.blue + '\n' + indentLines(normalize(sast.stringify(node))).gray)
-  return simple(['// TODO\n' + commentLines(sast.stringify(node))])
+  const initialIndent = node.position ? node.position.start.column - 1 : 0
+  return simple(['// TODO\n' + commentLines(repeat(' ', initialIndent).join('') + sast.stringify(node))])
 }
 
 function ignore(): ConvertResult {
