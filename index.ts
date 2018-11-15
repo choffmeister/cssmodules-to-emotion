@@ -1,14 +1,14 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as yargs from 'yargs'
-import { convert } from './src/convert'
+import { convert, Syntax } from './src/convert'
 
-function run(directory: string): void {
+function run(directory: string, syntax: Syntax): void {
   const files = listFiles(directory)
   files.forEach(file => {
     if (file.match(/\.scss$/)) {
       const input = fs.readFileSync(file, 'utf8')
-      const output = convert(input, file, 'scss')
+      const output = convert(input, file, syntax)
       fs.writeFileSync(file.substr(0, file.length - 5) + '.css.ts', output, 'utf8')
     } else if (file.match(/\.tsx$/)) {
       const input = fs.readFileSync(file, 'utf8')
@@ -43,7 +43,16 @@ function listFiles(dir: string): string[] {
 const cli = yargs
   .option('d', { alias: 'directory', type: 'string' })
   .coerce('d', path.resolve)
-  .demandOption(['d'])
+  .option('s', { alias: 'syntax' })
+  .coerce('s', mode => {
+    switch (mode) {
+      case 'css': return 'css'
+      case 'scss': return 'scss'
+      case 'less': return 'less'
+      default: throw new Error('The supported syntaxes are css, scss and less!')
+    }
+  })
+  .demandOption(['d', 's'])
   .strict()
 
-run(cli.argv.directory)
+run(cli.argv.directory, cli.argv.syntax)

@@ -4,7 +4,9 @@ import * as sast from 'sast'
 import { commentLines, indentLines, normalize, repeat } from './helpers'
 import { ConvertFunction, ConvertResult, SastNode } from './types'
 
-export function convert(input: string, filename: string, syntax: 'css' | 'less' | 'scss'): string {
+export type Syntax = 'css' | 'less' | 'scss'
+
+export function convert(input: string, filename: string, syntax: Syntax): string {
   return convertRoot(rewriteVariables(sast.parse(input, { syntax }))).join('\n\n')
 
   function convertRoot(node: SastNode): string[] {
