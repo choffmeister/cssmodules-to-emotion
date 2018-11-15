@@ -108,7 +108,7 @@ export function convert(input: string, filename: string, syntax: Syntax): string
             output: [],
             hoist: [resolvedNode],
           }
-        } else if (node.children[0].children.slice(1).every(n => n.type === 'pseudoClass')) {
+        } else if (node.children[0].children.slice(1).filter(n => n.type !== 'space').every(n => ['pseudoClass', 'combinator', 'typeSelector', 'universalSelector'].indexOf(n.type) >= 0)) {
           const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
           return {
             output: output.length > 0 ? [`${selector} {\n${indentLines(output.join('\n'))}\n}`] : [],
@@ -117,13 +117,7 @@ export function convert(input: string, filename: string, syntax: Syntax): string
         } else {
           return unsupported(filename, node)
         }
-      } else if (node.children[0].children[0].type === 'typeSelector') {
-        const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
-        return {
-          output: output.length > 0 ? [`${selector} {\n${indentLines(output.join('\n'))}\n}`] : [],
-          hoist,
-        }
-      } else if (node.children[0].children[0].type === 'universalSelector') {
+      } else if (node.children[0].children.filter(n => n.type !== 'space').every(n => ['pseudoClass', 'combinator', 'typeSelector', 'universalSelector'].indexOf(n.type) >= 0)) {
         const { output, hoist } = traverseChildren(block, [...parents, node], convertNode)
         return {
           output: output.length > 0 ? [`${selector} {\n${indentLines(output.join('\n'))}\n}`] : [],
@@ -223,10 +217,11 @@ export function convert(input: string, filename: string, syntax: Syntax): string
 function unsupported(filename: string, node: SastNode): ConvertResult {
   const position = node.position ? `${node.position.start.line}:${node.position.start.column}` : '?'
   const location = `${filename}:${position}`
-  // tslint:disable-next-line no-console
-  console.log('Unsupported node '.yellow + node.type + ' at '.yellow + location.blue + '\n' + indentLines(normalize(sast.stringify(node))).gray)
   const initialIndent = node.position ? node.position.start.column - 1 : 0
-  return simple(['// TODO\n' + commentLines(repeat(' ', initialIndent).join('') + sast.stringify(node))])
+  const content = normalize(repeat(' ', initialIndent).join('') + sast.stringify(node))
+  // tslint:disable-next-line no-console
+  console.log('Unsupported node '.yellow + node.type + ' at '.yellow + location.blue + '\n' + indentLines(content).gray)
+  return simple(['// TODO\n' + commentLines(content)])
 }
 
 function ignore(): ConvertResult {

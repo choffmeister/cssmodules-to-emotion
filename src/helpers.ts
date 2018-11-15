@@ -13,7 +13,7 @@ export function normalize(str: string): string {
 }
 
 export function commentLines(str: string): string {
-  return normalize(str).split('\n').map(l => '// ' + l).join('\n')
+  return str.split('\n').map(l => '// ' + l).join('\n')
 }
 
 export function indentLines(str: string): string {

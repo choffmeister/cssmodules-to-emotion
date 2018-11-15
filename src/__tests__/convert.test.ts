@@ -104,10 +104,9 @@ it('not flatten nested pseudo 1', () => {
           color: green;
         }
       }
-      // TODO
-      // &:hover form {
-      //   color: yellow;
-      // }
+      &:hover form {
+        color: yellow;
+      }
     \`
   `))
 })
@@ -166,6 +165,32 @@ it('nested wildcard selector', () => {
     export const foo = css\`
       color: red;
       * {
+        color: blue;
+      }
+    \`
+  `))
+})
+
+it('direct child selector', () => {
+  const scss = normalize(`
+    .foo {
+      & > * {
+        color: red;
+      }
+      & > div {
+        color: blue;
+      }
+    }
+  `)
+  const emotion = convert(scss, 'test.scss', 'scss')
+  expect(emotion).toBe(normalize(`
+    import { css } from 'emotion'
+
+    export const foo = css\`
+      & > * {
+        color: red;
+      }
+      & > div {
         color: blue;
       }
     \`
